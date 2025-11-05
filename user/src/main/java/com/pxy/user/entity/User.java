@@ -2,39 +2,49 @@ package com.pxy.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
+import com.pxy.user.domain.po.Menu;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Data
-@Builder
+//@Builder！！！  当实体类中存在不是数据表中的字段时，mybits映射会出错
 public class User implements UserDetails {
-    Integer id;
-    String name;
+    private Integer id;
+    private String name;
     @JsonIgnore
-    String password;
-    String status;
-    String roleId;
+    private String password;
+    private String status;
+    private String roleId;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime createDate;
+    private LocalDateTime createDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    LocalDateTime updateDate;
+    private LocalDateTime updateDate;
+    // 关键：表示该字段不映射到数据库
+    @JsonIgnore
+    private List<Menu> AuthoritieList; // 角色/权限符列表
 
-    //-----------实现UserDetails接口----------//
+    //-----------继承并实现UserDetails接口----------//
 
+    //此方法当需要权限验证时，会自动调用
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() { //返回权限列表
-        return List.of();
+        Collection<GrantedAuthority>  authorities = new ArrayList<>();
+        for (Menu authoritie : AuthoritieList) {
+            authorities.add(new SimpleGrantedAuthority(authoritie.getCode()));
+        }
+        return authorities; //返回用户的权限（角色或者code）
     }
 
     @Override
     public String getUsername() {
-        return this.getPassword();
+        return this.name;
     }
 
     @Override
