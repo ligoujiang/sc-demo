@@ -2,7 +2,6 @@ package com.pxy.user.handler;
 
 import cn.hutool.jwt.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pxy.user.entity.User;
 import com.pxy.user.utils.Result;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +30,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         Map<String,Object> map=new HashMap<>();
         map.put("user",authentication.getPrincipal());
         String token=JWTUtil.createToken(map,key.getBytes());
+        System.out.println(token);
 
 //        System.out.println(authentication.getPrincipal());
 //        User user=(User)authentication.getPrincipal();

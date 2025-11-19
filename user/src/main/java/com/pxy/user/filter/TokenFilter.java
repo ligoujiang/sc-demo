@@ -3,7 +3,9 @@ package com.pxy.user.filter;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.jwt.JWTUtil;
-import com.pxy.user.entity.User;
+import com.pxy.user.domain.po.Menu;
+import com.pxy.user.domain.po.User;
+import com.pxy.user.domain.vo.UserDetailsVO;
 import com.pxy.user.utils.Result;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,6 +21,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class TokenFilter extends OncePerRequestFilter {
@@ -47,8 +50,20 @@ public class TokenFilter extends OncePerRequestFilter {
             }else{
                 JSONObject payload=JWTUtil.parseToken(token).getPayloads();
                 String userJson=payload.get("user").toString();
-                User  user=JSONUtil.toBean(userJson,User.class);
-                Integer userid=user.getId();
+
+                //Integer userid=userDetailsVO.getUser().getId();
+
+                //解决拷贝不成功的问题
+                // 解析JSON
+                JSONObject jsonObject = JSONUtil.parseObj(userJson);
+                // 获取user对象
+                User user = JSONUtil.toBean(jsonObject.getJSONObject("user"), User.class);
+                // 获取权限列表
+                List<Menu> authoritieList = JSONUtil.toList(
+                        jsonObject.getJSONArray("AuthoritieList"), Menu.class);
+                // 创建UserDetailsVO
+                UserDetailsVO userDetailsVO = new UserDetailsVO(user, authoritieList);
+
                 //获取redis中的token，进行比较
                 String redisToken=stringRedisTemplate.opsForValue().get("user:login");
                 if(!token.equals(redisToken)){
@@ -56,8 +71,8 @@ public class TokenFilter extends OncePerRequestFilter {
                             .write(JSONUtil.toJsonStr(Result.error(903,"请求token错误")));
                 }else{
                     //在Sscurity句柄放置认证对象，这样Security在执行后面的Filter的时候，才知道是认证过的
-                    UsernamePasswordAuthenticationToken authentication
-                            =new UsernamePasswordAuthenticationToken(user,null, user.getAuthorities());
+                    UsernamePasswordAuthenticationToken authentication //userDetailsVO.getAuthorities()
+                            =new UsernamePasswordAuthenticationToken(userDetailsVO,null, userDetailsVO.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
                     //token验证通过，放行

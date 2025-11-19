@@ -1,8 +1,9 @@
-package com.pxy.user.entity;
+package com.pxy.user.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pxy.user.domain.po.Menu;
+import com.pxy.user.domain.po.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,23 +13,20 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 //@Builder！！！  当实体类中存在不是数据表中的字段时，mybits映射会出错
-public class User implements UserDetails {
-    private Integer id;
-    private String name;
-    @JsonIgnore
-    private String password;
-    private String status;
-    private String roleId;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime createDate;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateDate;
+public class UserDetailsVO implements UserDetails {
+    private User user;
     // 关键：表示该字段不映射到数据库
     @JsonIgnore
     private List<Menu> AuthoritieList; // 角色/权限符列表
+
+    public UserDetailsVO(User user,List<Menu> AuthoritieList) {
+        this.user = user;
+        this.AuthoritieList = Objects.requireNonNullElseGet(AuthoritieList, ArrayList::new);
+    }
 
     //-----------继承并实现UserDetails接口----------//
 
@@ -43,8 +41,13 @@ public class User implements UserDetails {
     }
 
     @Override
+    public String getPassword() {
+        return user.getPassword();
+    }
+
+    @Override
     public String getUsername() {
-        return this.name;
+        return user.getName();
     }
 
     @Override
@@ -67,3 +70,4 @@ public class User implements UserDetails {
         return true;
     }
 }
+

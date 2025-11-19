@@ -1,7 +1,7 @@
 package com.pxy.user.mapper;
 
 import com.pxy.user.domain.po.Menu;
-import com.pxy.user.entity.User;
+import com.pxy.user.domain.po.User;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

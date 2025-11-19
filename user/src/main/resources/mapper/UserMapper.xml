@@ -4,7 +4,7 @@
     <update id="setPassword">
         UPDATE user SET password = #{password} WHERE id = #{id};
     </update>
-    <select id="getUserByName" resultType="com.pxy.user.entity.User">
+    <select id="getUserByName" resultType="com.pxy.user.domain.po.User">
         select * from user where name=#{name}
     </select>
     <select id="getMenus" resultType="com.pxy.user.domain.po.Menu">

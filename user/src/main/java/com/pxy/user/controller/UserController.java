@@ -25,7 +25,7 @@ public class UserController {
         return "hello3";
     }
 
-    @PreAuthorize("hasAuthority('hello')")
+    @PreAuthorize("hasAuthority('user:123')")
     @ResponseBody
     @GetMapping("/hello")
     public String hello(){
@@ -53,7 +53,5 @@ public class UserController {
     @GetMapping("/getUserInfo")
     public Object getUserInfo(){
         return Result.success(200,"获取成功",LoginInfoUtil.getCurrentLoginUser());
-        //return SecurityContextHolder.getContext().getAuthentication().getPrincipal(); //直接获取登录账号的信息
-        //return principal;
     }
 }

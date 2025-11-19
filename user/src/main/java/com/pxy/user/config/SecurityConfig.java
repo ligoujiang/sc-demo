@@ -90,7 +90,7 @@ public class SecurityConfig {
                 //认证配置
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests
-                            .requestMatchers("/toLogin","/hello3","/hello4").permitAll()
+                            .requestMatchers("/toLogin","/hello3","/error").permitAll()
                             .anyRequest().authenticated();//任何请求都需要认证
                 })
                 //无权限
