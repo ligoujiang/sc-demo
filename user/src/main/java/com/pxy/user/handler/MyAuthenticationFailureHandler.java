@@ -1,7 +1,7 @@
 package com.pxy.user.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pxy.user.utils.Result;
+import com.pxy.user.utils.R;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ public class MyAuthenticationFailureHandler implements AuthenticationFailureHand
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
-        String json=objectMapper.writeValueAsString(Result.error(500,"登录失败:"+exception.getMessage()));
+        String json=objectMapper.writeValueAsString(R.error(500,"登录失败:"+exception.getMessage()));
         response.getWriter().write(json);
     }
 }

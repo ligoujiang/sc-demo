@@ -1,20 +1,16 @@
 package com.pxy.user;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.pxy.user.domain.po.User;
 import com.pxy.user.mapper.MenuMapper;
-import com.pxy.user.mapper.RoleMapper;
 import com.pxy.user.mapper.UserMapper;
-import com.pxy.user.mapper.admin.AdminMapper;
 import com.pxy.user.service.UserService;
-import io.lettuce.core.output.ScoredValueScanOutput;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.sql.SQLOutput;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 class person{
@@ -32,8 +28,6 @@ class UserApplicationTests {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private RoleMapper roleMapper;
 
     @Autowired
     private UserService userService;
@@ -43,8 +37,6 @@ class UserApplicationTests {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Autowired
-    private AdminMapper adminMapper;
 
     @Test
     void contextLoads() {
@@ -98,13 +90,17 @@ class UserApplicationTests {
 //        if (str1==str2){
 //            log.info("true");
 //        }
-        person p1=new person(1,"test");
-        person p2=new person(1,"test");
-        if (p1.equals(p2)){
-            log.info("true");
-        }
-        if (p1==p2){
-            log.info("true");
-        }
+//        person p1=new person(1,"test");
+//        person p2=new person(1,"test");
+//        if (p1.equals(p2)){
+//            log.info("true");
+//        }
+//        if (p1==p2){
+//            log.info("true");
+//        }
+
+        Page<User> page=new Page<>(1,2);
+        userMapper.selectPage(page,null);
+        System.out.println(page.getRecords());
     }
 }

@@ -2,7 +2,7 @@ package com.pxy.user.handler;
 
 import cn.hutool.jwt.JWTUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pxy.user.utils.Result;
+import com.pxy.user.utils.R;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,7 +41,7 @@ public class MyAuthenticationSuccessHandler implements AuthenticationSuccessHand
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
-        String json=objectMapper.writeValueAsString(Result.success(200,"登录成功",token));
+        String json=objectMapper.writeValueAsString(R.success(200,"登录成功",token));
         response.getWriter().write(json);
     }
 }

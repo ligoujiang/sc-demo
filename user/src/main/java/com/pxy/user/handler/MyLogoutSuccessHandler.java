@@ -1,11 +1,10 @@
 package com.pxy.user.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pxy.user.utils.Result;
+import com.pxy.user.utils.R;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.Authentication;
@@ -29,7 +28,7 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
-        String json=objectMapper.writeValueAsString(Result.success(200,"退出成功"));
+        String json=objectMapper.writeValueAsString(R.success(200,"退出成功"));
         response.getWriter().write(json);
     }
 }

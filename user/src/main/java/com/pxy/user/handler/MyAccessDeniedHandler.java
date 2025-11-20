@@ -1,7 +1,7 @@
 package com.pxy.user.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.pxy.user.utils.Result;
+import com.pxy.user.utils.R;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +19,7 @@ public class MyAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
         ObjectMapper objectMapper = new ObjectMapper();
-        String json=objectMapper.writeValueAsString(Result.success(401,"权限不足"));
+        String json=objectMapper.writeValueAsString(R.success(401,"权限不足"));
         response.getWriter().write(json);
     }
 }

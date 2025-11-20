@@ -90,8 +90,20 @@ public class SecurityConfig {
                 //认证配置
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests
-                            .requestMatchers("/toLogin","/hello3","/error").permitAll()
-                            .anyRequest().authenticated();//任何请求都需要认证
+                            .requestMatchers("/user/register","/toLogin","/hello3","/error").permitAll()
+                            .requestMatchers(
+                                    "/doc.html",
+                                    "/webjars/**",
+                                    "/swagger-resources/**",
+                                    "/v3/api-docs",
+                                    "/v3/api-docs/**",
+                                    "/v2/api-docs",
+                                    "/swagger-ui/**",
+                                    "/api-docs/**",
+                                    "/configuration/ui",
+                                    "/configuration/security"
+                            ).permitAll()
+                            .anyRequest().authenticated();//其他任何请求都需要认证
                 })
                 //无权限
                 .exceptionHandling(exceptionHandling -> {

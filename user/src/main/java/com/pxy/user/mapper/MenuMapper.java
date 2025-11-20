@@ -10,5 +10,5 @@ public interface MenuMapper {
      * @param userId
      * @return
      */
-    public List<Menu> getMenus(Integer userId);
+    public List<Menu> getMenus(Long userId);
 }
