@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class UserDTO {
     @Schema(description = "用户名称",example = "admin")
-    private String name;
+    private String username;
     @Schema(description = "用户密码",example = "123456")
     private String password;
 }

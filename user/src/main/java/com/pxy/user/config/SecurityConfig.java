@@ -8,18 +8,17 @@ import com.pxy.user.handler.MyLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -32,10 +31,10 @@ import java.util.List;
 public class SecurityConfig {
 
 
-    @Autowired
-    MyAuthenticationSuccessHandler authenticationSuccessHandler;
-    @Autowired
-    MyAuthenticationFailureHandler authenticationFailureHandler;
+//    @Autowired
+//    MyAuthenticationSuccessHandler authenticationSuccessHandler;
+//    @Autowired
+//    MyAuthenticationFailureHandler authenticationFailureHandler;
     @Autowired
     MyLogoutSuccessHandler logoutSuccessHandler;
     @Autowired
@@ -48,6 +47,11 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         // 使用BCrypt密码编码器
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
     }
 
     //配置跨域
@@ -71,16 +75,16 @@ public class SecurityConfig {
     //HttpSecurity http和CorsConfigurationSource corsConfigurationSource 属于方法参数注入
     public SecurityFilterChain SecurityFilterChain(HttpSecurity http,CorsConfigurationSource corsConfigurationSource) throws Exception {
         return http
-                //登录
-                .formLogin((formLogin) -> {
-                    formLogin
-                            .loginProcessingUrl("/login")//前端登录的账号和密码往这个地址发送请求
-                                    .successHandler(authenticationSuccessHandler) //登录成功后执行该handler
-                                    .failureHandler(authenticationFailureHandler); //登录失败后执行该handler
-                            //.loginPage("/toLogin") //登录页面的地址 重定向
-                            //.defaultSuccessUrl("/welcome", true); // 此用法不需要是get请求
-                            //.successForwardUrl("/welcome"); //登录成功跳转的地址,默认跳转上个地址   //注意！！跳转的请求方法必须是post
-                })
+//                //登录
+//                .formLogin((formLogin) -> {
+//                    formLogin
+//                            .loginProcessingUrl("/login")//前端登录的账号和密码往这个地址发送请求
+//                            .successHandler(authenticationSuccessHandler) //登录成功后执行该handler
+//                            .failureHandler(authenticationFailureHandler); //登录失败后执行该handler
+//                            //.loginPage("/toLogin") //登录页面的地址 重定向
+//                            //.defaultSuccessUrl("/welcome", true); // 此用法不需要是get请求
+//                            //.successForwardUrl("/welcome"); //登录成功跳转的地址,默认跳转上个地址   //注意！！跳转的请求方法必须是post
+//                })
                 //退出
                 .logout((logout) -> {
                     logout
@@ -90,7 +94,7 @@ public class SecurityConfig {
                 //认证配置
                 .authorizeHttpRequests((authorizeHttpRequests) -> {
                     authorizeHttpRequests
-                            .requestMatchers("/user/register","/toLogin","/hello3","/error").permitAll()
+                            .requestMatchers("/user/login","/user/register","/user/hello3","/error").permitAll()
                             .requestMatchers(
                                     "/doc.html",
                                     "/webjars/**",

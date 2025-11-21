@@ -8,16 +8,17 @@ import com.pxy.user.domain.vo.PageVO;
 import com.pxy.user.domain.vo.UserVO;
 import com.pxy.user.mapper.UserMapper;
 import com.pxy.user.service.UserService;
-import com.pxy.user.utils.LoginInfoUtil;
 import com.pxy.user.utils.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 
+@Slf4j
 @Tag(name = "用户管理")
 @RestController
 @RequestMapping("/user")
@@ -45,18 +46,21 @@ public class UserController {
         return "hello";
     }
 
-//    @PreAuthorize("hasAuthority('user:info')")
-//    @GetMapping("/getUserInfo")
-//    public Object getUserInfo(){
-//        return R.success(200,"获取成功",LoginInfoUtil.getCurrentLoginUser());
-//    }
-
-
     @Operation(summary = "用户注册")
     @PostMapping("/register")
     public R register(@RequestBody UserDTO userDTO){
         userService.register(userDTO);
         return R.success(200,"注册成功");
+    }
+
+    @Operation(summary = "用户登录")
+    @PostMapping("/login")
+    public R login(@RequestBody UserDTO userDTO){
+        String token=userService.login(userDTO);
+        if(token==null){
+            return R.error(401,"登录失败，账号或密码错误",token);
+        }
+        return R.success(200,"登录成功",token);
     }
 
     @Operation(summary = "根据id获取用户信息")
@@ -79,7 +83,7 @@ public class UserController {
     @Operation(summary = "分页查询用户信息")
     @PreAuthorize("hasAuthority('system:user:page')")
     @GetMapping("/page")
-    public R<PageVO> getUsers(PageDTO pageDTO){
+    public R<PageVO> getUsers(@RequestBody PageDTO pageDTO){
         Page<User> page=new Page<>(pageDTO.getPage(),pageDTO.getSize());
         userMapper.selectPage(page,null);
         PageVO pageVO=new PageVO();

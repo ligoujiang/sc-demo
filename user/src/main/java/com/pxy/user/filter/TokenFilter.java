@@ -46,7 +46,9 @@ public class TokenFilter extends OncePerRequestFilter {
             "/api-docs",
             "/configuration/ui",
             "/configuration/security",
-            "/user/register"
+            "/user/register",
+            "/user/login",
+            "/user/hello3"
     };
 
     @Override
@@ -95,13 +97,10 @@ public class TokenFilter extends OncePerRequestFilter {
                 String redisToken=stringRedisTemplate.opsForValue().get("user:login");
                 if(!token.equals(redisToken)){
                     response.getWriter()
-                            .write(JSONUtil.toJsonStr(R.error(903,"请求token错误")));
+                            .write(JSONUtil.toJsonStr(R.error(903,"请求token不一致")));
                 }else{
 
                     //TODO 是否可以从redis获取权限信息？
-
-
-
                     //在Sscurity句柄放置认证对象，这样Security在执行后面的Filter的时候，才知道是认证过的
                     UsernamePasswordAuthenticationToken authentication //userDetailsVO.getAuthorities()
                             =new UsernamePasswordAuthenticationToken(userDetailsVO,null, userDetailsVO.getAuthorities());
