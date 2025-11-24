@@ -5,7 +5,7 @@
         UPDATE user SET password = #{password} WHERE id = #{id};
     </update>
     <select id="getUserByName" resultType="com.pxy.user.domain.po.User">
-        select * from user where name=#{name}
+        select * from user where username=#{name}
     </select>
     <select id="getMenus" resultType="com.pxy.user.domain.po.Menu">
         select m.* from menu m

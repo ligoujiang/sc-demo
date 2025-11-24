@@ -1,7 +1,6 @@
 package com.pxy.user.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.pxy.user.domain.dto.PageDTO;
 import com.pxy.user.domain.dto.UserDTO;
 import com.pxy.user.domain.po.User;
 import com.pxy.user.domain.vo.PageVO;
@@ -15,8 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Collections;
 
 @Slf4j
 @Tag(name = "用户管理")
@@ -57,9 +54,6 @@ public class UserController {
     @PostMapping("/login")
     public R login(@RequestBody UserDTO userDTO){
         String token=userService.login(userDTO);
-        if(token==null){
-            return R.error(401,"登录失败，账号或密码错误",token);
-        }
         return R.success(200,"登录成功",token);
     }
 
@@ -80,16 +74,27 @@ public class UserController {
         return R.success(200,"修改成功");
     }
 
+
+    @Operation(summary = "修改用户角色")
+    @PreAuthorize("hasAuthority('system:user:update')")
+    @PostMapping("/role/{roleId}")
+    public R updateRole(@PathVariable Integer roleId){
+        //userService.updateRole(roleId);
+        return R.success(200,"修改成功");
+    }
+
     @Operation(summary = "分页查询用户信息")
     @PreAuthorize("hasAuthority('system:user:page')")
     @GetMapping("/page")
-    public R<PageVO> getUsers(@RequestBody PageDTO pageDTO){
-        Page<User> page=new Page<>(pageDTO.getPage(),pageDTO.getSize());
-        userMapper.selectPage(page,null);
+    public R<PageVO> getUsers(@RequestParam(defaultValue = "1") Integer page,
+                              @RequestParam(defaultValue = "5") Integer size,
+                              @RequestParam(required = false, defaultValue = "asc") String sortOrder){
+        Page<User> p=new Page<>(page,size);
+        userMapper.selectPage(p,null);
         PageVO pageVO=new PageVO();
-        pageVO.setTotal(page.getTotal());
-        pageVO.setPages(page.getPages());
-        pageVO.setRecords(Collections.singletonList(page.getRecords()));
+        pageVO.setTotal(p.getTotal());
+        pageVO.setPages(p.getPages());
+        pageVO.setRecords(p.getRecords());
         return R.success(200,"查询成功",pageVO);
     }
 }

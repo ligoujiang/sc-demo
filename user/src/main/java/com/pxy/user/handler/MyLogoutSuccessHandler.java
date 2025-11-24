@@ -2,6 +2,7 @@ package com.pxy.user.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pxy.user.utils.R;
+import com.pxy.user.utils.UserContext;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -12,6 +13,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
@@ -21,8 +23,12 @@ public class MyLogoutSuccessHandler implements LogoutSuccessHandler {
     //退出登录的处理
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        //清空redis中的token
-        stringRedisTemplate.delete("user:login");
+        //获取当前token
+        String token=request.getHeader("Authorization");
+        //获取用户id
+        Long userid = UserContext.getUserId();
+        //将token加入到redis黑名单
+        stringRedisTemplate.opsForValue().set("blacklist:"+token,userid.toString(),10, TimeUnit.MINUTES);
         //System.out.println("退出："+authentication.getPrincipal());
 
         response.setContentType("application/json;charset=UTF-8");

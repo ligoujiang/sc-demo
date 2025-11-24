@@ -15,7 +15,7 @@ public class User {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     @Schema(description = "用户名称",example = "admin")
-    private String name;
+    private String username;
     @JsonIgnore
     @Schema(description = "用户密码",example = "123456")
     private String password;

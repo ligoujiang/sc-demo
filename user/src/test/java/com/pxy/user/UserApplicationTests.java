@@ -1,5 +1,9 @@
 package com.pxy.user;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.jwt.JWT;
+import cn.hutool.jwt.JWTUtil;
+import cn.hutool.jwt.JWTValidator;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.pxy.user.domain.po.User;
 import com.pxy.user.mapper.MenuMapper;
@@ -11,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
 class person{
@@ -79,7 +84,7 @@ class UserApplicationTests {
     }
 
     @Test
-    void test2(){
+    void test2() throws InterruptedException {
 //        String str1= new String("hello");
 //        String str2= new String("hello");
 //        System.out.println(System.identityHashCode(str1));
@@ -99,8 +104,46 @@ class UserApplicationTests {
 //            log.info("true");
 //        }
 
-        Page<User> page=new Page<>(1,2);
-        userMapper.selectPage(page,null);
-        System.out.println(page.getRecords());
+//        Page<User> page=new Page<>(1,2);
+//        userMapper.selectPage(page,null);
+//        System.out.println(page.getRecords());
+
+        // 创建 JWT Token
+        String key = "your-secret-key";
+
+
+        String token = JWT.create()
+                .setPayload("userId", "12345")
+                .setPayload("username", "admin")
+                .setExpiresAt(new Date(System.currentTimeMillis() + 1000 * 2 )) // 1000 * 60 * 60 * 24 24小时过期
+                .setKey(key.getBytes())
+                .sign();
+        System.out.println("JWT Token: " + token);
+
+        // 验证 Token
+        // 等待3秒后再验证
+        Thread.sleep(3000);
+        boolean verify = JWTUtil.verify(token, key.getBytes());
+        System.out.println("Token 验证结果: " + verify);
+
+        // 2. 验证时间
+        try{
+            JWTValidator.of(token).validateDate(DateUtil.date());
+        }catch (Exception e){
+            System.out.println("已过期");
+        }
+
+//        // 手动验证过期时间
+//        JWT jwt = JWTUtil.parseToken(token);
+//        Object exp = jwt.getPayload("exp");
+//        if (exp != null) {
+//            long expireTime = Long.parseLong(exp.toString()) * 1000L; // 转为毫秒
+//            long currentTime = System.currentTimeMillis();
+//            boolean isExpired = currentTime > expireTime;
+//
+//            System.out.println("过期时间: " + new Date(expireTime));
+//            System.out.println("当前时间: " + new Date(currentTime));
+//            System.out.println("是否已过期: " + isExpired);
+//        }
     }
 }

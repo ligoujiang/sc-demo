@@ -1,11 +1,13 @@
 package com.pxy.user.filter;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.convert.Convert;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import cn.hutool.jwt.JWTUtil;
 import com.pxy.user.domain.po.Menu;
 import com.pxy.user.domain.po.User;
-import com.pxy.user.domain.vo.UserDetailsVO;
+import com.pxy.user.domain.dto.UserDetailsDTO;
 import com.pxy.user.utils.R;
 import com.pxy.user.utils.UserContext;
 import jakarta.servlet.FilterChain;
@@ -22,7 +24,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -55,10 +59,10 @@ public class TokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
         response.setCharacterEncoding("UTF-8");
-        //登录接口不需要token
+
         String requestURI = request.getRequestURI();
         log.info("请求的资源路径:{}",requestURI);
-
+        //登录接口不需要token
         // 如果是排除路径，直接放行
         if (isExcludePath(requestURI)) {
             filterChain.doFilter(request, response);
@@ -75,12 +79,10 @@ public class TokenFilter extends OncePerRequestFilter {
                 response.getWriter()
                         .write(JSONUtil.toJsonStr(R.error(902,"请求token不合法")));
             }else{
+                // 无状态
+                // 解析token
                 JSONObject payload=JWTUtil.parseToken(token).getPayloads();
                 String userJson=payload.get("user").toString();
-
-                //Integer userid=userDetailsVO.getUser().getId();
-
-                //解决拷贝不成功的问题
                 // 解析JSON
                 JSONObject jsonObject = JSONUtil.parseObj(userJson);
                 // 获取user对象
@@ -89,24 +91,20 @@ public class TokenFilter extends OncePerRequestFilter {
                 List<Menu> authoritieList = JSONUtil.toList(
                         jsonObject.getJSONArray("AuthoritieList"), Menu.class);
                 // 创建UserDetailsVO
-                UserDetailsVO userDetailsVO = new UserDetailsVO(user, authoritieList);
-                //存入thread local
+                UserDetailsDTO userDetailsVO = new UserDetailsDTO(user, authoritieList);
+                // 存入thread local
                 UserContext.setUserId(userDetailsVO.getUser().getId());
 
-                //获取redis中的token，进行比较
-                String redisToken=stringRedisTemplate.opsForValue().get("user:login");
-                if(!token.equals(redisToken)){
+                //TODO 从redis中获取，用于判断是否主动失效
+                if(stringRedisTemplate.hasKey("blacklist:"+token)){
                     response.getWriter()
-                            .write(JSONUtil.toJsonStr(R.error(903,"请求token不一致")));
+                            .write(JSONUtil.toJsonStr(R.error(903,"请求token已失效",null)));
                 }else{
-
-                    //TODO 是否可以从redis获取权限信息？
-                    //在Sscurity句柄放置认证对象，这样Security在执行后面的Filter的时候，才知道是认证过的
+                    // 放置认证对象，这样Security在执行后面的Filter的时候，才知道是认证过的
                     UsernamePasswordAuthenticationToken authentication //userDetailsVO.getAuthorities()
                             =new UsernamePasswordAuthenticationToken(userDetailsVO,null, userDetailsVO.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-
-                    //token验证通过，放行
+                    // token验证通过，放行
                     filterChain.doFilter(request,response);
                 }
             }
@@ -127,3 +125,39 @@ public class TokenFilter extends OncePerRequestFilter {
         return false;
     }
 }
+
+
+
+//有状态
+//                //解析token获取用户id
+//                JSONObject payload=JWTUtil.parseToken(token).getPayloads();
+//                Long userId = Convert.toLong(payload);
+//                //存入thread local
+//                UserContext.setUserId(userId);
+//                //获取redis中的token，进行比较
+//                String redisToken=stringRedisTemplate.opsForValue().get("user:login:"+token);
+//                if(redisToken==null){
+//                    response.getWriter()
+//                            .write(JSONUtil.toJsonStr(R.error(903,"请求token不一致")));
+//                }else{
+//                    //刷新token时效
+//                    stringRedisTemplate.expire("user:login:"+token,30, TimeUnit.MINUTES);
+//                    // 从redis获取用户和权限信息
+//                    // 解析JSON
+//                    JSONObject jsonObject = JSONUtil.parseObj(redisToken);
+//                    // 获取user对象
+//                    User user = JSONUtil.toBean(jsonObject.getJSONObject("user"), User.class);
+//                    // 获取权限列表
+//                    List<Menu> authoritieList = JSONUtil.toList(
+//                        jsonObject.getJSONArray("AuthoritieList"), Menu.class);
+//                    // 创建UserDetailsVO
+//                    UserDetailsDTO userDetailsDTO = new UserDetailsDTO(user, authoritieList);
+//
+//                    //在Sscurity句柄放置认证对象，这样Security在执行后面的Filter的时候，才知道是认证过的
+//                    UsernamePasswordAuthenticationToken authentication //userDetailsVO.getAuthorities()
+//                            =new UsernamePasswordAuthenticationToken(userDetailsDTO,null, userDetailsDTO.getAuthorities());
+//                    SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//                    //token验证通过，放行
+//                    filterChain.doFilter(request,response);
+//                }
